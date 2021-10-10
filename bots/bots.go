@@ -1,7 +1,7 @@
 package bots
 
 import (
-	"go-3commas/types"
+	"github.com/EwanValentine/go-3commas/types"
 	"net/http"
 )
 
@@ -46,7 +46,9 @@ func (b *Bots) Create(request *CreateRequest) (*CreateResponse, error) {
 	}
 
 	var createResponse *CreateResponse
-	response.Unmarshal(createResponse)
+	if err := response.Unmarshal(createResponse); err != nil {
+		return nil, err
+	}
 
 	return createResponse, nil
 }

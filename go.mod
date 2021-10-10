@@ -1,3 +1,3 @@
-module go-3commas
+module github.com/EwanValentine/go-3commas
 
 go 1.15
