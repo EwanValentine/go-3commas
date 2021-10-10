@@ -8,11 +8,10 @@ const (
 	Composite Type = "composite"
 )
 
-
 type Scope string
 
 const (
-	Enabled Scope = "enabled"
+	Enabled  Scope = "enabled"
 	Disabled Scope = "disabled"
 )
 
@@ -61,38 +60,39 @@ const (
 	Market StartOrderType = "market"
 )
 
+// StopLossType -
 type StopLossType string
 
 const (
 	StopLoss              StopLossType = "stop_loss"
-	StopLossAndDisableBot              = "stop_loss_and_disable_bot"
+	StopLossAndDisableBot StopLossType = "stop_loss_and_disable_bot"
 )
 
 // Bot -
 type Bot struct {
-	Name string `json:"name", validate:"required"`
+	Name string `json:"name" validate:"required"`
 
 	// Fetch from accounts.List() or /ver1/accounts
-	AccountID int   `json:"account_id", validate:"required"`
-	Pairs     Pairs `json:"pairs", validate:"required"`
+	AccountID int   `json:"account_id" validate:"required"`
+	Pairs     Pairs `json:"pairs" validate:"required"`
 
 	// Default 1
 	MaxActiveDeals      int `json:"max_active_deals"`
-	BaseOrderVolume     int `json:"base_order_volume", validate:"required"`
+	BaseOrderVolume     int `json:"base_order_volume" validate:"required"`
 	BaseOrderVolumeType int `json:"base_order_volume_type"`
 
 	// In percentage
-	TakeProfit            int    `json:"take_profit", validate:"required"`
-	SafetyOrderVolume     int    `json:"safety_order_volume", validate:"required"`
+	TakeProfit            int    `json:"take_profit" validate:"required"`
+	SafetyOrderVolume     int    `json:"safety_order_volume" validate:"required"`
 	SafetyOrderVolumeType string `json:"safety_order_volume_type"`
 
 	// Default 1
-	MartingaleVolumeCoefficient int `json:"martingale_volume_coefficient", validate:"required"'`
+	MartingaleVolumeCoefficient int `json:"martingale_volume_coefficient" validate:"required"`
 
 	// Default 1
-	MartingaleStepCoefficient int `json:"martingale_step_coefficient", validate:"required"`
-	MaxSafetyOrders           int `json:"max_safety_orders", validate:"required"`
-	ActiveSafetyOrdersCount   int `json:"active_safety_orders_count", validate:"required"`
+	MartingaleStepCoefficient int `json:"martingale_step_coefficient" validate:"required"`
+	MaxSafetyOrders           int `json:"max_safety_orders" validate:"required"`
+	ActiveSafetyOrdersCount   int `json:"active_safety_orders_count" validate:"required"`
 	StopLossPercentage        int `json:"stop_loss_percentage"`
 	Cooldown                  int `json:"cooldown"`
 
@@ -105,16 +105,16 @@ type Bot struct {
 
 	// Short/Long, default is Long
 	Strategy                  Strategy `json:"strategy"`
-	SafetyOrderStepPercentage int      `json:"safety_order_step_percentage", validate:"required"`
+	SafetyOrderStepPercentage int      `json:"safety_order_step_percentage" validate:"required"`
 
 	// base, total (base)	Percentage: base – from base order, total – from total volume
-	TakeProfitType TakeProfitType `json:"take_profit_type", validate:"required"`
+	TakeProfitType TakeProfitType `json:"take_profit_type" validate:"required"`
 
 	// For manual signals: [{"strategy":"nonstop"}] or []
 	// For non-stop(1 pair only): [{"strategy":"nonstop"}]
 	// QFL: {"options"=>{"type"=>"original"}, "strategy"=>"qfl"}]
 	// TradingView: [{"options"=>{"time"=>"5m", "type"=>"buy_or_strong_buy"}, "strategy"=>"trading_view"}
-	StrategyList StrategyList `json:"strategy_list", validate:"required"`
+	StrategyList StrategyList `json:"strategy_list" validate:"required"`
 
 	// custom, cross, not_specified (not_specified)	Used for Bitmex bots only
 	LeverageType             LeverageType `json:"leverage_type"`

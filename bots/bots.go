@@ -1,21 +1,22 @@
 package bots
 
 import (
-	"github.com/EwanValentine/go-3commas/types"
 	"net/http"
+
+	"github.com/EwanValentine/go-3commas/types"
 )
 
-type requester interface {
+type requestAdapter interface {
 	Request(endpoint, method string, request *types.Request) (*types.Response, error)
 }
 
 // Bots -
 type Bots struct {
-	requester
+	requestAdapter
 }
 
 // NewBots -
-func NewBots(requester requester) *Bots {
+func NewBots(requester requestAdapter) *Bots {
 	return &Bots{requester}
 }
 
@@ -28,7 +29,6 @@ type GetStrategyListRequest struct {
 
 // GetStrategyListResponse -
 type GetStrategyListResponse struct {
-
 }
 
 // CreateRequest -
@@ -40,7 +40,7 @@ type CreateResponse struct{}
 // Create a new bot
 func (b *Bots) Create(request *CreateRequest) (*CreateResponse, error) {
 	r, _ := types.NewRequest().Marshal(request)
-	response, err := b.requester.Request("", http.MethodPost, r)
+	response, err := b.requestAdapter.Request("", http.MethodPost, r)
 	if err != nil {
 		return nil, err
 	}
@@ -54,10 +54,10 @@ func (b *Bots) Create(request *CreateRequest) (*CreateResponse, error) {
 }
 
 // ListRequest -
-type ListRequest struct{
+type ListRequest struct {
 	// Default 50
-	Limit int `json:"limit"`
-	Offset int `json:"offset"`
+	Limit     int    `json:"limit"`
+	Offset    int    `json:"offset"`
 	AccountID string `json:"account_id"`
 	// Enabled/Disabled
 	Scope Scope `json:"scope"`
@@ -71,7 +71,7 @@ type ListResponse struct {
 // List bots
 func (b *Bots) List() (*ListResponse, error) {
 	request := &types.Request{}
-	response, err := b.requester.Request("", http.MethodGet, request)
+	response, err := b.requestAdapter.Request("bots", http.MethodGet, request)
 	if err != nil {
 		return nil, err
 	}
@@ -91,7 +91,7 @@ type UpdateResponse struct{}
 // Update -
 func (b *Bots) Update() (*UpdateResponse, error) {
 	request := &types.Request{}
-	response, err := b.requester.Request("", http.MethodPatch, request)
+	response, err := b.requestAdapter.Request("bots", http.MethodPatch, request)
 	if err != nil {
 		return nil, err
 	}
