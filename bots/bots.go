@@ -1,6 +1,8 @@
+// The code that interacts with the API for bots
 package bots
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/EwanValentine/go-3commas/types"
@@ -54,26 +56,99 @@ func (b *Bots) Create(bot *Bot) (*CreateResponse, error) {
 	return createBotResponse, nil
 }
 
-// ListRequest -
-type ListRequest struct {
-	// Default 50
-	Limit     int    `json:"limit"`
-	Offset    int    `json:"offset"`
-	AccountID string `json:"account_id"`
-	// Enabled/Disabled
-	Scope Scope `json:"scope"`
+// PauseRequest -
+type PauseRequest struct {
+	ID int `json:"id"`
 }
 
-// ListRequestV1 -
-type ListRequestV1 struct {
+// PauseResponse - @todo better types
+type PauseResponse map[string]interface{}
+
+// Pause -
+func (b *Bots) Pause(id int) (*PauseResponse, error) {
+	request := &types.Request{
+		Body: PauseRequest{
+			ID: id,
+		},
+	}
+	var pauseResponse *PauseResponse
+	err := b.requestAdapter.Request(fmt.Sprintf("/bots/%d/disable", id), http.MethodPost, request, &pauseResponse)
+	if err != nil {
+		return nil, err
+	}
+
+	return pauseResponse, nil
+}
+
+// UnpauseRequest -
+type UnpauseRequest struct {
+	ID int `json:"id"`
+}
+
+// UnpauseResponse -
+type UnpauseResponse map[string]interface{}
+
+// Unpause -
+func (b *Bots) Unpause(id int) (*UnpauseResponse, error) {
+	request := &types.Request{
+		Body: UnpauseRequest{
+			ID: id,
+		},
+	}
+	var unpauseResponse *UnpauseResponse
+	err := b.requestAdapter.Request(fmt.Sprintf("/bots/%d/enable", id), http.MethodPost, request, &unpauseResponse)
+	if err != nil {
+		return nil, err
+	}
+
+	return unpauseResponse, nil
+}
+
+type StatsRequest struct {
+	ID int `json:"id"`
+}
+
+type StatsResponse map[string]interface{}
+
+// Stats -
+func (b *Bots) Stats(id int) (*StatsResponse, error) {
+	request := &types.Request{
+		Body: StatsRequest{ID: id},
+	}
+	var statsResponse *StatsResponse
+	err := b.requestAdapter.Request(fmt.Sprintf("/bots/%d/deals_stats", id), http.MethodGet, request, &statsResponse)
+	if err != nil {
+		return nil, err
+	}
+
+	return statsResponse, nil
+}
+
+type ShowRequest struct {
+	ID int `json:"id"`
+}
+
+type ShowResponse map[string]interface{}
+
+// Show -
+func (b *Bots) Show(id int) (*ShowResponse, error) {
+	request := &types.Request{
+		Body: ShowRequest{ID: id},
+	}
+	var showResponse *ShowResponse
+	err := b.requestAdapter.Request(fmt.Sprintf("/bots/%d/show", id), http.MethodGet, request, &showResponse)
+	if err != nil {
+		return nil, err
+	}
+
+	return showResponse, nil
+}
+
+// ListRequest -
+type ListRequest struct {
 	Limit         int    `json:"limit"`
 	SortBy        string `json:"sort_by"`
 	SortDirection string `json:"sort_direction"`
-}
-
-// ListResponseV1 -
-type ListResponseV1 struct {
-	Bots []Bot `json:"bots"`
 }
 
 // ListResponse -
@@ -82,7 +157,7 @@ type ListResponse []Bot
 // List bots
 func (b *Bots) List() (*ListResponse, error) {
 
-	var listBotsRequest ListRequestV1
+	var listBotsRequest ListRequest
 
 	listBotsRequest.Limit = 50
 	listBotsRequest.SortBy = "created_at"

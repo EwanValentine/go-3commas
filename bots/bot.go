@@ -1,3 +1,4 @@
+// The Bot entity or data type
 package bots
 
 // Type of bot, i.e simple or composite
@@ -70,6 +71,7 @@ const (
 
 // Bot -
 type Bot struct {
+	ID   int    `json:"id"`
 	Name string `json:"name" validate:"required"`
 
 	// Fetch from accounts.List() or /ver1/accounts

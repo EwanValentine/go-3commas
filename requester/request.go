@@ -1,7 +1,6 @@
 package requester
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -62,6 +61,9 @@ func ToSnakeCase(str string) string {
 func (r *Requester) Request(endpoint, method string, payload *types.Request, val interface{}) error {
 	signerService := signer.New()
 
+	// These are the parameters that have to be included in the url parameters
+	// regardless of method. These are used when signing the url and creating
+	// the signature
 	pl := Payload{
 		"type":    "binance",
 		"name":    "Binance",
@@ -69,15 +71,12 @@ func (r *Requester) Request(endpoint, method string, payload *types.Request, val
 		"secret":  r.secret,
 	}
 
-	u := fmt.Sprintf("%s%s%s", BaseURL, V1, endpoint)
+	u := BaseURL + V1 + endpoint
 
 	signature := ""
-	var req *http.Request
-	var err error
 
-	if method == http.MethodGet {
-		values := url.Values{}
-
+	values := url.Values{}
+	if payload.Body != nil {
 		v := reflect.ValueOf(payload.Body)
 		typeOfS := v.Type()
 
@@ -86,27 +85,19 @@ func (r *Requester) Request(endpoint, method string, payload *types.Request, val
 			value := v.Field(i).Interface()
 			values.Add(ToSnakeCase(field.Name), fmt.Sprintf("%v", value))
 		}
-
-		// Add additional args to payload
-		for k, v := range pl {
-			values.Add(k, fmt.Sprintf("%v", v))
-		}
-
-		queryParams := values.Encode()
-
-		endpoint = fmt.Sprintf("%s%s", V1, endpoint)
-		signature = signerService.Do(r.secret, endpoint, queryParams)
-
-		u := fmt.Sprintf("%s?%s", u, queryParams)
-		req, err = http.NewRequest(method, u, nil)
-	} else if method == http.MethodPost {
-		params, _ := json.Marshal(payload)
-		signature = signerService.Do(r.secret, endpoint, string(params))
-		req, err = http.NewRequest(method, u, bytes.NewReader(params))
-	} else {
-		// @todo - handle bad request method type
 	}
 
+	// Add additional args to payload
+	for k, v := range pl {
+		values.Add(k, fmt.Sprintf("%v", v))
+	}
+
+	queryParams := values.Encode()
+	endpoint = fmt.Sprintf("%s%s", V1, endpoint)
+	signature = signerService.Do(r.secret, endpoint, queryParams)
+	u = fmt.Sprintf("%s?%s", u, queryParams)
+
+	req, err := http.NewRequest(method, u, nil)
 	if err != nil {
 		return err
 	}
@@ -115,6 +106,11 @@ func (r *Requester) Request(endpoint, method string, payload *types.Request, val
 	req.Header.Set("signature", signature)
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("Content-Type", "application/json")
+
+	if method == http.MethodPost {
+		req.PostForm = values
+		req.Method = http.MethodPost
+	}
 
 	response, err := r.client.Do(req)
 	if err != nil {
