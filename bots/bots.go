@@ -7,7 +7,7 @@ import (
 )
 
 type requestAdapter interface {
-	Request(endpoint, method string, request *types.Request) (*types.Response, error)
+	Request(endpoint, method string, request *types.Request, val interface{}) error
 }
 
 // Bots -
@@ -32,25 +32,26 @@ type GetStrategyListResponse struct {
 }
 
 // CreateRequest -
-type CreateRequest Bot
+type CreateRequest struct {
+	Body *Bot `json:"body"`
+}
 
 // CreateResponse -
 type CreateResponse struct{}
 
 // Create a new bot
-func (b *Bots) Create(request *CreateRequest) (*CreateResponse, error) {
-	r, _ := types.NewRequest().Marshal(request)
-	response, err := b.requestAdapter.Request("", http.MethodPost, r)
+func (b *Bots) Create(bot *Bot) (*CreateResponse, error) {
+	var createBotResponse *CreateResponse
+
+	request := &types.Request{
+		Body: bot,
+	}
+	err := b.requestAdapter.Request("/bots", http.MethodPost, request, &createBotResponse)
 	if err != nil {
 		return nil, err
 	}
 
-	var createResponse *CreateResponse
-	if err := response.Unmarshal(createResponse); err != nil {
-		return nil, err
-	}
-
-	return createResponse, nil
+	return createBotResponse, nil
 }
 
 // ListRequest -
@@ -63,21 +64,39 @@ type ListRequest struct {
 	Scope Scope `json:"scope"`
 }
 
-// ListResponse -
-type ListResponse struct {
-	Bots []Bot
+// ListRequestV1 -
+type ListRequestV1 struct {
+	Limit         int    `json:"limit"`
+	SortBy        string `json:"sort_by"`
+	SortDirection string `json:"sort_direction"`
 }
+
+// ListResponseV1 -
+type ListResponseV1 struct {
+	Bots []Bot `json:"bots"`
+}
+
+// ListResponse -
+type ListResponse []Bot
 
 // List bots
 func (b *Bots) List() (*ListResponse, error) {
-	request := &types.Request{}
-	response, err := b.requestAdapter.Request("bots", http.MethodGet, request)
-	if err != nil {
-		return nil, err
+
+	var listBotsRequest ListRequestV1
+
+	listBotsRequest.Limit = 50
+	listBotsRequest.SortBy = "created_at"
+	listBotsRequest.SortDirection = "desc"
+
+	request := &types.Request{
+		Body: listBotsRequest,
 	}
 
 	var listResponse *ListResponse
-	_ = response.Unmarshal(listResponse)
+	err := b.requestAdapter.Request("/bots", http.MethodGet, request, &listResponse)
+	if err != nil {
+		return nil, err
+	}
 
 	return listResponse, nil
 }
@@ -91,13 +110,11 @@ type UpdateResponse struct{}
 // Update -
 func (b *Bots) Update() (*UpdateResponse, error) {
 	request := &types.Request{}
-	response, err := b.requestAdapter.Request("bots", http.MethodPatch, request)
+	var updateResponse *UpdateResponse
+	err := b.requestAdapter.Request("/bots", http.MethodPatch, request, &updateResponse)
 	if err != nil {
 		return nil, err
 	}
-
-	var updateResponse *UpdateResponse
-	_ = response.Unmarshal(updateResponse)
 
 	return updateResponse, nil
 }

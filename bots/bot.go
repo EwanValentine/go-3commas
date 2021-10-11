@@ -35,7 +35,7 @@ const (
 )
 
 // StrategyList JSON string of strategy types // @todo make this an actual type?
-type StrategyList []byte
+type StrategyList []map[string]interface{}
 
 // LeverageType - Bitmex bots only
 type LeverageType string
@@ -77,35 +77,35 @@ type Bot struct {
 	Pairs     Pairs `json:"pairs" validate:"required"`
 
 	// Default 1
-	MaxActiveDeals      int `json:"max_active_deals"`
-	BaseOrderVolume     int `json:"base_order_volume" validate:"required"`
-	BaseOrderVolumeType int `json:"base_order_volume_type"`
+	MaxActiveDeals      int    `json:"max_active_deals"`
+	BaseOrderVolume     string `json:"base_order_volume" validate:"required"`
+	BaseOrderVolumeType string `json:"base_order_volume_type"`
 
 	// In percentage
-	TakeProfit            int    `json:"take_profit" validate:"required"`
-	SafetyOrderVolume     int    `json:"safety_order_volume" validate:"required"`
+	TakeProfit            string `json:"take_profit" validate:"required"`
+	SafetyOrderVolume     string `json:"safety_order_volume" validate:"required"`
 	SafetyOrderVolumeType string `json:"safety_order_volume_type"`
 
 	// Default 1
-	MartingaleVolumeCoefficient int `json:"martingale_volume_coefficient" validate:"required"`
+	MartingaleVolumeCoefficient string `json:"martingale_volume_coefficient" validate:"required"`
 
 	// Default 1
-	MartingaleStepCoefficient int `json:"martingale_step_coefficient" validate:"required"`
-	MaxSafetyOrders           int `json:"max_safety_orders" validate:"required"`
-	ActiveSafetyOrdersCount   int `json:"active_safety_orders_count" validate:"required"`
-	StopLossPercentage        int `json:"stop_loss_percentage"`
-	Cooldown                  int `json:"cooldown"`
+	MartingaleStepCoefficient string `json:"martingale_step_coefficient" validate:"required"`
+	MaxSafetyOrders           int    `json:"max_safety_orders" validate:"required"`
+	ActiveSafetyOrdersCount   int    `json:"active_safety_orders_count" validate:"required"`
+	StopLossPercentage        string `json:"stop_loss_percentage"`
+	Cooldown                  string `json:"cooldown"`
 
 	// Default false
 	TrailingEnabled bool `json:"trailing_enabled"`
 
 	// Required if TrailingEnabled is true @todo add validation for this
-	TrailingDeviation int `json:"trailing_deviation"`
-	BTCPriceLimit     int `json:"btc_price_limit"`
+	TrailingDeviation string `json:"trailing_deviation"`
+	BTCPriceLimit     string `json:"btc_price_limit"`
 
 	// Short/Long, default is Long
 	Strategy                  Strategy `json:"strategy"`
-	SafetyOrderStepPercentage int      `json:"safety_order_step_percentage" validate:"required"`
+	SafetyOrderStepPercentage string   `json:"safety_order_step_percentage" validate:"required"`
 
 	// base, total (base)	Percentage: base – from base order, total – from total volume
 	TakeProfitType TakeProfitType `json:"take_profit_type" validate:"required"`
@@ -123,7 +123,7 @@ type Bot struct {
 	MaxPrice                 int          `json:"max_price"`
 	StopLossTimeoutEnabled   bool         `json:"stop_loss_timeout_enabled"`
 	StopLossTimeoutInSeconds int          `json:"stop_loss_timeout_in_seconds"`
-	MinVolumeBTC24H          int          `json:"min_volume_btc_24h"`
+	MinVolumeBTC24H          string       `json:"min_volume_btc_24h"`
 
 	// Bitmex only
 	TSLEnabled            bool `json:"tsl_enabled"`

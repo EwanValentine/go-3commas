@@ -11,7 +11,7 @@ func NewRequest() *Request {
 
 // Request -
 type Request struct {
-	Body []byte
+	Body interface{}
 }
 
 // Marshal -
