@@ -1,9 +1,7 @@
 package bots
 
 import (
-	"log"
 	"net/http"
-	"sync"
 	"testing"
 
 	"github.com/EwanValentine/go-3commas/conf"
@@ -11,66 +9,43 @@ import (
 	"github.com/matryer/is"
 )
 
-var (
-	bot  *Bot
-	once *sync.Once
-	c    *conf.Config
-	b    *Bots
-	r    *requester.Requester
-)
-
-func init() {
-	once = &sync.Once{}
+func newTestBot() *Bot {
+	return &Bot{
+		// Initialize the bot with the required fields
+	}
 }
 
-func setup(t *testing.T) *is.I {
+func newTestBots() *Bots {
+	c := conf.Load()
+	r := requester.NewRequester(http.DefaultClient, c.APIKey, c.SecretKey)
+	return NewBots(r)
+}
+
+func TestBots(t *testing.T) {
 	is := is.New(t)
-	once.Do(func() {
-		c = conf.Load()
-		r = requester.NewRequester(http.DefaultClient, c.APIKey, c.SecretKey)
-		b = NewBots(r)
+	b := newTestBots()
+
+	t.Run("List", func(t *testing.T) {
+		response, err := b.List()
+		is.NoErr(err)
+		is.True(len(*response) > 0)
 	})
-	return is
-}
 
-func TestCanListBots(t *testing.T) {
-	is := setup(t)
+	bot := newTestBot()
 
-	response, err := b.List()
-	is.NoErr(err)
-	is.True(len(*response) > 0)
+	t.Run("Stats", func(t *testing.T) {
+		response, err := b.Stats(bot.ID)
+		is.NoErr(err)
+		is.True(len(*response) > 0)
+	})
 
-	// Set a bot for future tests, this is stateful and weird,
-	// need a better way to get a bot, or mock them
-	res := *response
-	bot = &res[0]
-}
+	t.Run("Pause", func(t *testing.T) {
+		_, err := b.Pause(bot.ID)
+		is.NoErr(err)
+	})
 
-func TestCanGetStatus(t *testing.T) {
-	is := setup(t)
-
-	response, err := b.Stats(bot.ID)
-	is.NoErr(err)
-
-	log.Println(response)
-
-	is.True(len(*response) > 0)
-}
-
-func TestCanPause(t *testing.T) {
-	is := setup(t)
-
-	response, err := b.Pause(bot.ID)
-	is.NoErr(err)
-
-	log.Println(response)
-}
-
-func TestCanUnpause(t *testing.T) {
-	is := setup(t)
-
-	response, err := b.Unpause(bot.ID)
-	is.NoErr(err)
-
-	log.Println(response)
+	t.Run("Unpause", func(t *testing.T) {
+		_, err := b.Unpause(bot.ID)
+		is.NoErr(err)
+	})
 }

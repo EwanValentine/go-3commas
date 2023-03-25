@@ -3,7 +3,7 @@ package requester
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/url"
 	"os"
@@ -16,22 +16,19 @@ import (
 )
 
 const (
-	// BaseURL -
 	BaseURL = "https://api.3commas.io"
 	V1      = "/public/api/ver1"
 	V2      = "/public/api/v2"
 	WS      = "'wss://ws.3commas.io/websocket"
 )
 
-// Requester -
 type Requester struct {
 	client *http.Client
 	key    string
 	secret string
 }
 
-// Factory -
-func Factory() *Requester {
+func FromEnv() *Requester {
 	client := &http.Client{}
 	key := os.Getenv("API_KEY")
 	secret := os.Getenv("SECRET_KEY")
@@ -39,32 +36,25 @@ func Factory() *Requester {
 	return NewRequester(client, key, secret)
 }
 
-// NewRequester -
 func NewRequester(client *http.Client, key, secret string) *Requester {
 	return &Requester{client, key, secret}
 }
 
-// Payload -
 type Payload map[string]interface{}
 
 var matchFirstCap = regexp.MustCompile("(.)([A-Z][a-z]+)")
 var matchAllCap = regexp.MustCompile("([a-z0-9])([A-Z])")
 
-// ToSnakeCase -
 func ToSnakeCase(str string) string {
 	snake := matchFirstCap.ReplaceAllString(str, "${1}_${2}")
 	snake = matchAllCap.ReplaceAllString(snake, "${1}_${2}")
 	return strings.ToLower(snake)
 }
 
-// Request -
 func (r *Requester) Request(endpoint, method string, payload *types.Request, val interface{}) error {
 	signerService := signer.New()
 
-	// These are the parameters that have to be included in the url parameters
-	// regardless of method. These are used when signing the url and creating
-	// the signature
-	pl := Payload{
+	requiredParams := Payload{
 		"type":    "binance",
 		"name":    "Binance",
 		"api_key": r.key,
@@ -87,8 +77,7 @@ func (r *Requester) Request(endpoint, method string, payload *types.Request, val
 		}
 	}
 
-	// Add additional args to payload
-	for k, v := range pl {
+	for k, v := range requiredParams {
 		values.Add(k, fmt.Sprintf("%v", v))
 	}
 
@@ -117,7 +106,7 @@ func (r *Requester) Request(endpoint, method string, payload *types.Request, val
 		return err
 	}
 
-	body, err := ioutil.ReadAll(response.Body)
+	body, err := io.ReadAll(response.Body)
 	if err != nil {
 		return err
 	}

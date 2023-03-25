@@ -1,4 +1,3 @@
-// The Bot entity or data type
 package bots
 
 // Type of bot, i.e simple or composite
@@ -69,45 +68,44 @@ const (
 	StopLossAndDisableBot StopLossType = "stop_loss_and_disable_bot"
 )
 
-// Bot -
+// Bot represents a trading bot with its configuration parameters.
 type Bot struct {
 	ID   int    `json:"id"`
 	Name string `json:"name" validate:"required"`
 
-	// Fetch from accounts.List() or /ver1/accounts
-	AccountID int   `json:"account_id" validate:"required"`
-	Pairs     Pairs `json:"pairs" validate:"required"`
+	// Basic bot settings
+	AccountID int      `json:"account_id" validate:"required"`
+	Pairs     Pairs    `json:"pairs" validate:"required"`
+	Strategy  Strategy `json:"strategy"`
 
-	// Default 1
+	// Deal settings
 	MaxActiveDeals      int    `json:"max_active_deals"`
 	BaseOrderVolume     string `json:"base_order_volume" validate:"required"`
 	BaseOrderVolumeType string `json:"base_order_volume_type"`
+	TakeProfit          string `json:"take_profit" validate:"required"`
 
-	// In percentage
-	TakeProfit            string `json:"take_profit" validate:"required"`
-	SafetyOrderVolume     string `json:"safety_order_volume" validate:"required"`
-	SafetyOrderVolumeType string `json:"safety_order_volume_type"`
-
-	// Default 1
+	// Safety order settings
+	SafetyOrderVolume           string `json:"safety_order_volume" validate:"required"`
+	SafetyOrderVolumeType       string `json:"safety_order_volume_type"`
 	MartingaleVolumeCoefficient string `json:"martingale_volume_coefficient" validate:"required"`
+	MartingaleStepCoefficient   string `json:"martingale_step_coefficient" validate:"required"`
+	MaxSafetyOrders             int    `json:"max_safety_orders" validate:"required"`
+	ActiveSafetyOrdersCount     int    `json:"active_safety_orders_count" validate:"required"`
+	SafetyOrderStepPercentage   string `json:"safety_order_step_percentage" validate:"required"`
 
-	// Default 1
-	MartingaleStepCoefficient string `json:"martingale_step_coefficient" validate:"required"`
-	MaxSafetyOrders           int    `json:"max_safety_orders" validate:"required"`
-	ActiveSafetyOrdersCount   int    `json:"active_safety_orders_count" validate:"required"`
-	StopLossPercentage        string `json:"stop_loss_percentage"`
-	Cooldown                  string `json:"cooldown"`
+	// Stop loss settings
+	StopLossPercentage       string       `json:"stop_loss_percentage"`
+	StopLossTimeoutEnabled   bool         `json:"stop_loss_timeout_enabled"`
+	StopLossTimeoutInSeconds int          `json:"stop_loss_timeout_in_seconds"`
+	StopLossType             StopLossType `json:"stop_loss_type"`
 
-	// Default false
-	TrailingEnabled bool `json:"trailing_enabled"`
-
-	// Required if TrailingEnabled is true @todo add validation for this
+	// Trailing settings
+	TrailingEnabled   bool   `json:"trailing_enabled"`
 	TrailingDeviation string `json:"trailing_deviation"`
-	BTCPriceLimit     string `json:"btc_price_limit"`
 
-	// Short/Long, default is Long
-	Strategy                  Strategy `json:"strategy"`
-	SafetyOrderStepPercentage string   `json:"safety_order_step_percentage" validate:"required"`
+	// Miscellaneous settings
+	BTCPriceLimit string `json:"btc_price_limit"`
+	Cooldown      string `json:"cooldown"`
 
 	// base, total (base)	Percentage: base – from base order, total – from total volume
 	TakeProfitType TakeProfitType `json:"take_profit_type" validate:"required"`
@@ -119,13 +117,11 @@ type Bot struct {
 	StrategyList StrategyList `json:"strategy_list" validate:"required"`
 
 	// custom, cross, not_specified (not_specified)	Used for Bitmex bots only
-	LeverageType             LeverageType `json:"leverage_type"`
-	LeverageCustomValue      int          `json:"leverage_custom_value"`
-	MinPrice                 int          `json:"min_price"`
-	MaxPrice                 int          `json:"max_price"`
-	StopLossTimeoutEnabled   bool         `json:"stop_loss_timeout_enabled"`
-	StopLossTimeoutInSeconds int          `json:"stop_loss_timeout_in_seconds"`
-	MinVolumeBTC24H          string       `json:"min_volume_btc_24h"`
+	LeverageType        LeverageType `json:"leverage_type"`
+	LeverageCustomValue int          `json:"leverage_custom_value"`
+	MinPrice            int          `json:"min_price"`
+	MaxPrice            int          `json:"max_price"`
+	MinVolumeBTC24H     string       `json:"min_volume_btc_24h"`
 
 	// Bitmex only
 	TSLEnabled            bool `json:"tsl_enabled"`
@@ -136,9 +132,6 @@ type Bot struct {
 
 	// Limit/market
 	StartOrderType StartOrderType `json:"start_order_type"`
-
-	// stop_loss, stop_loss_and_disable_bot
-	StopLossType StopLossType `json:"stop_loss_type"`
 
 	// Bot will be disabled after opening this number of deals
 	DisableAfterDealsCount int `json:"disable_after_deals_count"`

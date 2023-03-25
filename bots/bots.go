@@ -1,4 +1,3 @@
-// The code that interacts with the API for bots
 package bots
 
 import (
@@ -8,47 +7,40 @@ import (
 	"github.com/EwanValentine/go-3commas/types"
 )
 
-type requestAdapter interface {
+type RequestAdapter interface {
 	Request(endpoint, method string, request *types.Request, val interface{}) error
 }
 
-// Bots -
 type Bots struct {
-	requestAdapter
+	RequestAdapter
 }
 
-// NewBots -
-func NewBots(requester requestAdapter) *Bots {
+func NewBots(requester RequestAdapter) *Bots {
 	return &Bots{requester}
 }
 
-// GetStrategyListRequest -
 type GetStrategyListRequest struct {
 	AccountID string   `json:"account_id"`
 	Type      Type     `json:"type"`
 	Strategy  Strategy `json:"strategy"`
 }
 
-// GetStrategyListResponse -
 type GetStrategyListResponse struct {
 }
 
-// CreateRequest -
 type CreateRequest struct {
 	Body *Bot `json:"body"`
 }
 
-// CreateResponse -
 type CreateResponse struct{}
 
-// Create a new bot
 func (b *Bots) Create(bot *Bot) (*CreateResponse, error) {
-	var createBotResponse *CreateResponse
+	createBotResponse := &CreateResponse{}
 
 	request := &types.Request{
 		Body: bot,
 	}
-	err := b.requestAdapter.Request("/bots", http.MethodPost, request, &createBotResponse)
+	err := b.RequestAdapter.Request("/bots", http.MethodPost, request, createBotResponse)
 	if err != nil {
 		return nil, err
 	}
@@ -56,23 +48,20 @@ func (b *Bots) Create(bot *Bot) (*CreateResponse, error) {
 	return createBotResponse, nil
 }
 
-// PauseRequest -
 type PauseRequest struct {
 	ID int `json:"id"`
 }
 
-// PauseResponse - @todo better types
 type PauseResponse map[string]interface{}
 
-// Pause -
 func (b *Bots) Pause(id int) (*PauseResponse, error) {
+	pauseResponse := &PauseResponse{}
 	request := &types.Request{
 		Body: PauseRequest{
 			ID: id,
 		},
 	}
-	var pauseResponse *PauseResponse
-	err := b.requestAdapter.Request(fmt.Sprintf("/bots/%d/disable", id), http.MethodPost, request, &pauseResponse)
+	err := b.RequestAdapter.Request(fmt.Sprintf("/bots/%d/disable", id), http.MethodPost, request, pauseResponse)
 	if err != nil {
 		return nil, err
 	}
@@ -80,23 +69,20 @@ func (b *Bots) Pause(id int) (*PauseResponse, error) {
 	return pauseResponse, nil
 }
 
-// UnpauseRequest -
 type UnpauseRequest struct {
 	ID int `json:"id"`
 }
 
-// UnpauseResponse -
 type UnpauseResponse map[string]interface{}
 
-// Unpause -
 func (b *Bots) Unpause(id int) (*UnpauseResponse, error) {
+	unpauseResponse := &UnpauseResponse{}
 	request := &types.Request{
 		Body: UnpauseRequest{
 			ID: id,
 		},
 	}
-	var unpauseResponse *UnpauseResponse
-	err := b.requestAdapter.Request(fmt.Sprintf("/bots/%d/enable", id), http.MethodPost, request, &unpauseResponse)
+	err := b.RequestAdapter.Request(fmt.Sprintf("/bots/%d/enable", id), http.MethodPost, request, unpauseResponse)
 	if err != nil {
 		return nil, err
 	}
@@ -110,13 +96,12 @@ type StatsRequest struct {
 
 type StatsResponse map[string]interface{}
 
-// Stats -
 func (b *Bots) Stats(id int) (*StatsResponse, error) {
+	statsResponse := &StatsResponse{}
 	request := &types.Request{
 		Body: StatsRequest{ID: id},
 	}
-	var statsResponse *StatsResponse
-	err := b.requestAdapter.Request(fmt.Sprintf("/bots/%d/deals_stats", id), http.MethodGet, request, &statsResponse)
+	err := b.RequestAdapter.Request(fmt.Sprintf("/bots/%d/deals_stats", id), http.MethodGet, request, statsResponse)
 	if err != nil {
 		return nil, err
 	}
@@ -130,13 +115,12 @@ type ShowRequest struct {
 
 type ShowResponse map[string]interface{}
 
-// Show -
 func (b *Bots) Show(id int) (*ShowResponse, error) {
+	showResponse := &ShowResponse{}
 	request := &types.Request{
 		Body: ShowRequest{ID: id},
 	}
-	var showResponse *ShowResponse
-	err := b.requestAdapter.Request(fmt.Sprintf("/bots/%d/show", id), http.MethodGet, request, &showResponse)
+	err := b.RequestAdapter.Request(fmt.Sprintf("/bots/%d/show", id), http.MethodGet, request, showResponse)
 	if err != nil {
 		return nil, err
 	}
@@ -144,14 +128,12 @@ func (b *Bots) Show(id int) (*ShowResponse, error) {
 	return showResponse, nil
 }
 
-// ListRequest -
 type ListRequest struct {
 	Limit         int    `json:"limit"`
 	SortBy        string `json:"sort_by"`
 	SortDirection string `json:"sort_direction"`
 }
 
-// ListResponse -
 type ListResponse []Bot
 
 // List bots
@@ -168,7 +150,7 @@ func (b *Bots) List() (*ListResponse, error) {
 	}
 
 	var listResponse *ListResponse
-	err := b.requestAdapter.Request("/bots", http.MethodGet, request, &listResponse)
+	err := b.RequestAdapter.Request("/bots", http.MethodGet, request, &listResponse)
 	if err != nil {
 		return nil, err
 	}
@@ -186,7 +168,7 @@ type UpdateResponse struct{}
 func (b *Bots) Update() (*UpdateResponse, error) {
 	request := &types.Request{}
 	var updateResponse *UpdateResponse
-	err := b.requestAdapter.Request("/bots", http.MethodPatch, request, &updateResponse)
+	err := b.RequestAdapter.Request("/bots", http.MethodPatch, request, &updateResponse)
 	if err != nil {
 		return nil, err
 	}
